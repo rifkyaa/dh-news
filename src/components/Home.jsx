@@ -40,8 +40,8 @@ const Home = () => {
     <div className="py-6 px-6 md:px-10 lg:px-12 2xl:px-28">
         <div className="flex flex-col items-center justify-center gap-4 h-[50vh] mb-20">
             <img src={newsGIF} width={200} height={200} alt="gif"/>
-            <h1 className="text-6xl md:text-8xl text-center" style={{ fontFamily: "Playfair Display, serif" }}>Stay <span className="px-1.5 bg-[linear-gradient(to_bottom,transparent_50%,#c2f564_50%)]">Informed</span>, Stay <span className="px-1.5 bg-[linear-gradient(to_bottom,transparent_50%,#c2f564_50%)]">Ahead</span></h1>
-            <p className="text-[1rem] md:text-lg text-center text-gray-500" style={{ fontFamily: "Roboto, sans-serif" }} >Kabar terkini dari berbagai sumber terpercaya, semuanya dalam satu tempat.</p>
+            <h1 className="text-6xl md:text-8xl text-center">Stay <span className="px-1.5 bg-[linear-gradient(to_bottom,transparent_50%,#c2f564_50%)]">Informed</span>, Stay <span className="px-1.5 bg-[linear-gradient(to_bottom,transparent_50%,#c2f564_50%)]">Ahead</span></h1>
+            <p className="text-[1rem] md:text-lg text-center text-gray-500" >Kabar terkini dari berbagai sumber terpercaya, semuanya dalam satu tempat.</p>
         </div>
 
         <div className="flex flex-col gap-3.5 md:flex-row justify-between items-center mb-6 pt-10">

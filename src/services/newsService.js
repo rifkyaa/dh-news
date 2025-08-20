@@ -20,15 +20,30 @@ export const fetchGNews = async (keyword) => {
 };
 
 export const fetchNewsAPI = async (keyword) => {
-  const res = await fetch(
-    `https://newsapi.org/v2/everything?q=${keyword}&language=en&apiKey=${API_KEY_NEWSAPI}`
-  );
-  const data = await res.json();
+  try {
+    let res;
 
-  return (
-    data.articles
-      ?.slice(0, 10)
-      .map((a) => ({
+    if (import.meta.env.DEV) {
+      // Dev: boleh direct (biasanya CORS di localhost diperbolehkan)
+      const API_KEY_NEWSAPI = import.meta.env.VITE_NEWSAPI_KEY;
+      res = await fetch(
+        `https://newsapi.org/v2/everything?q=${encodeURIComponent(keyword)}&language=en&apiKey=${API_KEY_NEWSAPI}`
+      );
+    } else {
+      // Prod: lewat serverless function (tidak expose key)
+      res = await fetch(`/api/newsapi?q=${encodeURIComponent(keyword)}`);
+    }
+
+    const data = await res.json();
+
+    // Jika NewsAPI balikin error object
+    if (data?.status === "error") {
+      console.error("NewsAPI error:", data);
+      return [];
+    }
+
+    return (
+      data.articles?.slice(0, 10).map((a) => ({
         title: a.title,
         description: a.description,
         url: a.url,
@@ -36,8 +51,13 @@ export const fetchNewsAPI = async (keyword) => {
         publishedAt: a.publishedAt,
         source: "NewsAPI",
       })) || []
-  );
+    );
+  } catch (e) {
+    console.error("fetchNewsAPI failed:", e);
+    return [];
+  }
 };
+
 
 export const fetchNyTimesApi = async (keyword) => {
   const res = await fetch(

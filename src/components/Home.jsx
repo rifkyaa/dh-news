@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { fetchAllNews, fetchGNews, fetchNewsAPI, fetchNyTimesApi } from "../services/newsService";
 import ArticleCard from "./ArticleCard"; 
 import newsGIF from "../../public/newsGIF.gif"
+import SkeletonCard from "./SkeletonCard";
 
 const Home = () => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("AI");
   const [filter, setFilter] = useState("all");
+  const [visible, setVisible] = useState(6);
 
   const getNews = async (keyword, source = filter) => {
     setLoading(true);
@@ -25,6 +27,7 @@ const Home = () => {
 
     setNews(results);
     setLoading(false);
+    setVisible(6);
   };
 
   useEffect(() => {
@@ -34,6 +37,10 @@ const Home = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     getNews(query, filter);
+  };
+
+  const handleLoadMore = () => {
+    setVisible((prev) => prev + 6);
   };
 
   return (
@@ -74,15 +81,32 @@ const Home = () => {
         </div>
 
       {loading ? (
-        <p className="text-center">Loading...</p>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
       ) : news.length === 0 ? (
         <p className="text-center text-gray-500">No articles found.</p>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {news.map((article, index) => (
-            <ArticleCard key={index} article={article} />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {news.slice(0, visible).map((article, index) => (
+              <ArticleCard key={index} article={article} />
+            ))}
+          </div>
+
+          {visible < news.length && (
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={handleLoadMore}
+                className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition"
+              >
+                Load More
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

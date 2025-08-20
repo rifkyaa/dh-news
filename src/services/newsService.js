@@ -1,24 +1,3 @@
-const API_KEY_GNEWS = import.meta.env.VITE_GNEWS_API_KEY;
-const API_KEY_NEWSAPI = import.meta.env.VITE_NEWSAPI_KEY;
-const API_KEY_NYTIMESAPI = import.meta.env.VITE_NYTIMESAPI_KEY;
-
-export const fetchGNews = async (keyword) => {
-  const res = await fetch(
-    `https://gnews.io/api/v4/search?q=${keyword}&lang=en&token=${API_KEY_GNEWS}`
-  );
-  const data = await res.json();
-  return (
-    data.articles?.map((a) => ({
-      title: a.title,
-      description: a.description,
-      url: a.url,
-      image: a.image,
-      publishedAt: a.publishedAt,
-      source: "GNews",
-    })) || []
-  );
-};
-
 export const fetchNewsAPI = async (keyword) => {
   try {
     let res;
@@ -59,16 +38,54 @@ export const fetchNewsAPI = async (keyword) => {
 };
 
 
-export const fetchNyTimesApi = async (keyword) => {
-  const res = await fetch(
-    `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=${keyword}&api-key=${API_KEY_NYTIMESAPI}`
-  );
-  const data = await res.json();
+export const fetchGNews = async (keyword) => {
+  try {
+    let res;
 
-  return (
-    data.response.docs
-      ?.slice(0, 10)
-      .map((a) => ({
+    if (import.meta.env.DEV) {
+      const API_KEY_GNEWS = import.meta.env.VITE_GNEWS_API_KEY;
+      res = await fetch(
+        `https://gnews.io/api/v4/search?q=${encodeURIComponent(keyword)}&lang=en&token=${API_KEY_GNEWS}`
+      );
+    } else {
+      res = await fetch(`/api/gnews?q=${encodeURIComponent(keyword)}`);
+    }
+
+    const data = await res.json();
+
+    return (
+      data.articles?.map((a) => ({
+        title: a.title,
+        description: a.description,
+        url: a.url,
+        image: a.image,
+        publishedAt: a.publishedAt,
+        source: "GNews",
+      })) || []
+    );
+  } catch (e) {
+    console.error("fetchGNews failed:", e);
+    return [];
+  }
+};
+
+export const fetchNyTimesApi = async (keyword) => {
+  try {
+    let res;
+
+    if (import.meta.env.DEV) {
+      const API_KEY_NYTIMESAPI = import.meta.env.VITE_NYTIMESAPI_KEY;
+      res = await fetch(
+        `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=${encodeURIComponent(keyword)}&api-key=${API_KEY_NYTIMESAPI}`
+      );
+    } else {
+      res = await fetch(`/api/nytimes?q=${encodeURIComponent(keyword)}`);
+    }
+
+    const data = await res.json();
+
+    return (
+      data.response?.docs?.map((a) => ({
         title: a.headline?.main,
         description: a.abstract,
         url: a.web_url,
@@ -78,8 +95,13 @@ export const fetchNyTimesApi = async (keyword) => {
         publishedAt: a.pub_date,
         source: "New York Times",
       })) || []
-  );
+    );
+  } catch (e) {
+    console.error("fetchNyTimesApi failed:", e);
+    return [];
+  }
 };
+
 
 export const fetchAllNews = async (keyword) => {
   const [gnews, newsapi, nytimes] = await Promise.all([
